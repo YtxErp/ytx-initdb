@@ -1,0 +1,14 @@
+[package]
+name = "ytx-initdb"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+dotenvy = "0.15"
+postgres = "0.19"
+url="2.5"
+rand = "0.9"
+aes-gcm = "0.10"
+aes = "0.8"
+cipher = "0.4"
+base64 = "0.22"
