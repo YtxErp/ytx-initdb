@@ -1,0 +1,41 @@
+# ⚠️ IMPORTANT: Before running, make sure to update the host machine paths below
+# 1. Vault data directory: /Users/ytx/Docker/vault/file
+# 2. Vault logs directory: /Users/ytx/Docker/vault/logs
+# 3. Postgres data directory: /Users/ytx/Docker/postgres/data
+# 4. Postgres password: change POSTGRES_PASSWORD to your own secure password
+
+services:
+    vault:
+        image: hashicorp/vault:latest
+        container_name: vault
+        cap_add:
+            - IPC_LOCK
+        ports:
+            - "8200:8200"
+        volumes:
+            - /Users/ytx/Docker/vault/file:/vault/file
+            - /Users/ytx/Docker/vault/logs:/vault/logs
+        environment:
+            VAULT_LOCAL_CONFIG: |
+                {
+                  "storage": {"file": {"path": "/vault/file"}},
+                  "listener": [{"tcp": {"address": "0.0.0.0:8200","tls_disable": true}}],
+                  "default_lease_ttl": "168h",
+                  "max_lease_ttl": "720h",
+                  "ui": true
+                }
+        command: server
+
+    db:
+        image: postgres:latest
+        container_name: postgres
+        restart: always
+        shm_size: 128mb
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_DB: postgres
+            POSTGRES_PASSWORD: "yourpassword"
+        volumes:
+            - /Users/ytx/Docker/postgres/data:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"

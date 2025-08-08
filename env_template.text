@@ -1,0 +1,25 @@
+# =========================================
+# .env - YTX InitDb Environment Configuration
+# =========================================
+# Rename this file to ".env" and place it in your project root.
+# This file is used when initializing databases.
+# =========================================
+
+# -----------------------------------------
+# Vault & PostgreSQL Connection
+# -----------------------------------------
+VAULT_TOKEN=                                # Vault token for fetching passwords
+VAULT_URL=http://127.0.0.1:8200             # Vault server address
+POSTGRES_URL=postgres://postgres@localhost:5432/postgres
+
+# -----------------------------------------
+# Database Names
+# -----------------------------------------
+AUTH_DB=ytx_auth                            # Authentication database
+MAIN_DB=ytx_main                            # Main application database
+MAIN_WORKSPACE=ytx_workspace                # Default workspace identifier for new users
+
+# -----------------------------------------
+# PostgreSQL Superuser
+# -----------------------------------------
+POSTGRES_ROLE=postgres                      # Global PostgreSQL superuser role
