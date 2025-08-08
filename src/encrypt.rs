@@ -15,7 +15,7 @@ use rand::{RngCore, rng};
 /// # Errors
 /// Returns an error if the key length is not 32 bytes or encryption fails.
 pub fn encrypt_password(
-    plain: &str,
+    password: &str,
     key: &[u8],
 ) -> Result<(String, String), Box<dyn std::error::Error>> {
     // Ensure key length is 32 bytes (256 bits)
@@ -33,7 +33,7 @@ pub fn encrypt_password(
 
     // Encrypt the plaintext and handle possible errors
     let ciphertext = cipher
-        .encrypt(nonce, plain.as_bytes())
+        .encrypt(nonce, password.as_bytes())
         .map_err(|e| format!("Encryption failed: {}", e))?;
 
     // Return base64 encoded ciphertext and nonce

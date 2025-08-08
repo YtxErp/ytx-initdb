@@ -96,14 +96,14 @@ fn main() -> Result<(), String> {
     })?;
 
     // Encrypt readonly user password and insert corresponding role record into auth database
-    let (readonly_enc_password, readonly_nonce) = encrypt_password(&readonly_password, &enc_key)
+    let (readonly_ciphertext, readonly_nonce) = encrypt_password(&readonly_password, &enc_key)
         .map_err(|e| format!("Failed to encrypt readonly user password {}", e))?;
 
     insert_database_role(
         &mut auth_client,
         &auth_db,
         &readonly_user,
-        &readonly_enc_password,
+        &readonly_ciphertext,
         &readonly_nonce,
     )
     .map_err(|e| {
@@ -114,13 +114,14 @@ fn main() -> Result<(), String> {
     })?;
 
     // Encrypt readwrite user password and insert corresponding role record into auth database
-    let (readwrite_enc_password, readwrite_nonce) = encrypt_password(&readwrite_password, &enc_key)
-        .map_err(|e| format!("Failed to encrypt readwrite user password {}", e))?;
+    let (readwrite_ciphertext, readwrite_nonce) =
+        encrypt_password(&readwrite_password, &enc_key)
+            .map_err(|e| format!("Failed to encrypt readwrite user password {}", e))?;
     insert_database_role(
         &mut auth_client,
         &auth_db,
         &readwrite_user,
-        &readwrite_enc_password,
+        &readwrite_ciphertext,
         &readwrite_nonce,
     )
     .map_err(|e| {

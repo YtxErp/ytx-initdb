@@ -308,19 +308,19 @@ pub fn insert_database_role(
     client: &mut Client,
     database_name: &str,
     role_name: &str,
-    password_enc: &str,
+    ciphertext: &str,
     nonce: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let sql = r#"
-        INSERT INTO ytx_database_role (database_name, role_name, password_enc, nonce)
+        INSERT INTO ytx_database_role (database_name, role_name, ciphertext, nonce)
         VALUES ($1, $2, $3, $4)
         ON CONFLICT (database_name, role_name) DO UPDATE
-        SET password_enc = EXCLUDED.password_enc,
+        SET ciphertext = EXCLUDED.ciphertext,
             nonce = EXCLUDED.nonce,
             updated_time = now()
     "#;
 
-    client.execute(sql, &[&database_name, &role_name, &password_enc, &nonce])?;
+    client.execute(sql, &[&database_name, &role_name, &ciphertext, &nonce])?;
     Ok(())
 }
 

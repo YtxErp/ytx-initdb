@@ -49,7 +49,7 @@ pub fn ytx_database_role() -> String {
     CREATE TABLE IF NOT EXISTS ytx_database_role (
         database_name    TEXT NOT NULL,
         role_name        TEXT NOT NULL,
-        password_enc     TEXT NOT NULL,
+        ciphertext       TEXT NOT NULL,
         nonce            TEXT NOT NULL,
         register_time    TIMESTAMPTZ(0) DEFAULT now(),
         updated_time     TIMESTAMPTZ(0) DEFAULT now(),
