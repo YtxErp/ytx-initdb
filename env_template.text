@@ -1,0 +1,63 @@
+# =========================================
+# .env - YTX InitDb Environment Configuration
+# =========================================
+# Rename this file to ".env" and place it in your project root.
+# This file is used when initializing databases and creating roles.
+# Role names must be consistent with ytx-server .env to avoid mismatches.
+# =========================================
+
+# -----------------------------------------
+# Vault & PostgreSQL Connection
+# -----------------------------------------
+POSTGRES_TOKEN=                        # Vault token for fetching role passwords (optional)
+POSTGRES_URL=postgres://postgres@localhost:5432/postgres
+VAULT_ADDR=http://127.0.0.1:8200        # Vault server address
+
+# -----------------------------------------
+# Database Names
+# -----------------------------------------
+AUTH_DB=ytx_auth                        # Authentication database name
+MAIN_DB=ytx_main                        # Main application database name
+MAIN_WORKSPACE=ytx_workspace            # Default workspace identifier for new users
+
+# -----------------------------------------
+# PostgreSQL Superuser
+# -----------------------------------------
+POSTGRES_ROLE=postgres                  # Global PostgreSQL superuser role name
+POSTGRES_PASSWORD=                      # Superuser password (used if Vault token is empty)
+
+# -----------------------------------------
+# AUTH_DB Roles Password
+# -----------------------------------------
+YTX_AUTH_READWRITE_PASSWORD=                 # Password for AUTH_DB read/write role
+
+# -----------------------------------------
+# MAIN_DB Roles Password
+# -----------------------------------------
+YTX_MAIN_READWRITE_PASSWORD=                # Global read/write role for MAIN_DB
+YTX_MAIN_READONLY_PASSWORD=                 # Global read-only role for MAIN_DB
+
+YTX_MAIN_FINANCE_READWRITE_PASSWORD=        # Read/write role for FINANCE section
+YTX_MAIN_FINANCE_READONLY_PASSWORD=         # Read-only role for FINANCE section
+
+YTX_MAIN_STAKEHOLDER_READWRITE_PASSWORD=    # Read/write role for STAKEHOLDER section
+YTX_MAIN_STAKEHOLDER_READONLY_PASSWORD=     # Read-only role for STAKEHOLDER section
+
+YTX_MAIN_ITEM_READWRITE_PASSWORD=           # Read/write role for ITEM section
+YTX_MAIN_ITEM_READONLY_PASSWORD=            # Read-only role for ITEM section
+
+YTX_MAIN_TASK_READWRITE_PASSWORD=           # Read/write role for TASK section
+YTX_MAIN_TASK_READONLY_PASSWORD=            # Read-only role for TASK section
+
+YTX_MAIN_SALE_READWRITE_PASSWORD=           # Read/write role for SALE section
+YTX_MAIN_SALE_READONLY_PASSWORD=            # Read-only role for SALE section
+
+YTX_MAIN_PURCHASE_READWRITE_PASSWORD=       # Read/write role for PURCHASE section
+YTX_MAIN_PURCHASE_READONLY_PASSWORD=        # Read-only role
+
+# -----------------------------------------
+# Notes:
+# - Only *_PASSWORD values can differ between environments
+# - *_ROLE values must match ytx-server .env
+# - Vault takes priority over .env for password values if POSTGRES_TOKEN is set
+# -----------------------------------------
