@@ -124,7 +124,6 @@ pub fn f_entry_table() -> String {
             lhs_debit      NUMERIC(12, 4) CHECK (lhs_debit  >= 0),
             lhs_credit     NUMERIC(12, 4) CHECK (lhs_credit >= 0),
             description    TEXT,
-            support_node   UUID,
             document       TEXT,
             is_checked     BOOLEAN DEFAULT FALSE,
             rhs_credit     NUMERIC(16, 8) CHECK (rhs_credit >= 0),
