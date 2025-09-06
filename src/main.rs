@@ -18,7 +18,7 @@ fn main() -> Result<()> {
     // Connection
     let postgres_url =
         var("POSTGRES_URL").unwrap_or_else(|_| "postgres://localhost:5432/postgres".to_string());
-    let vault_addr = var("VAULT_ADDR").unwrap_or_else(|_| "http://127.0.0.1:8200".to_string());
+    let vault_addr = var("VAULT_URL").unwrap_or_else(|_| "http://127.0.0.1:8200".to_string());
 
     // Database names
     let auth_db = read_value_with_default("AUTH_DB", "ytx_auth")?;
@@ -28,27 +28,22 @@ fn main() -> Result<()> {
     // Roles
     let postgres_role = read_value_with_default("POSTGRES_ROLE", "postgres")?;
 
-    // Passwords (can be overridden by Vault)
-    let mut postgres_password = var("POSTGRES_PASSWORD").unwrap_or_default();
-    let mut auth_readwrite_password = var("YTX_AUTH_READWRITE_PASSWORD").unwrap_or_default();
-    let mut main_readwrite_password = var("YTX_MAIN_READWRITE_PASSWORD").unwrap_or_default();
-    let mut main_readonly_password = var("YTX_MAIN_READONLY_PASSWORD").unwrap_or_default();
-
-    let mut ytx_passwords: Value = Value::Null;
-
-    if let Ok(postgres_token) = var("POSTGRES_TOKEN") {
-        if !postgres_token.is_empty() {
-            let pg_passwords = read_vault_data(&vault_addr, &postgres_token, POSTGRES_SECRET_PATH)
-                .context("Failed to read PostgreSQL superuser password from Vault")?;
-            postgres_password = get_vault_password(&pg_passwords, &postgres_role)?;
-
-            ytx_passwords = read_vault_data(&vault_addr, &postgres_token, YTX_SECRET_PATH)
-                .context("Failed to read YTX role passwords from Vault")?;
-            auth_readwrite_password = get_vault_password(&ytx_passwords, AUTH_READWRITE_ROLE)?;
-            main_readonly_password = get_vault_password(&ytx_passwords, MAIN_READONLY_ROLE)?;
-            main_readwrite_password = get_vault_password(&ytx_passwords, MAIN_READWRITE_ROLE)?;
-        }
+    // Passwords (Vault)
+    let vault_token = var("VAULT_TOKEN")
+        .context("VAULT_TOKEN is required to fetch database passwords from Vault")?;
+    if vault_token.is_empty() {
+        anyhow::bail!("VAULT_TOKEN is empty");
     }
+
+    let pg_passwords = read_vault_data(&vault_addr, &vault_token, POSTGRES_SECRET_PATH)
+        .context("Failed to read PostgreSQL superuser password from Vault")?;
+    let postgres_password = get_vault_password(&pg_passwords, &postgres_role)?;
+
+    let ytx_passwords = read_vault_data(&vault_addr, &vault_token, YTX_SECRET_PATH)
+        .context("Failed to read YTX role passwords from Vault")?;
+    let auth_readwrite_password = get_vault_password(&ytx_passwords, AUTH_READWRITE_ROLE)?;
+    let main_readonly_password = get_vault_password(&ytx_passwords, MAIN_READONLY_ROLE)?;
+    let main_readwrite_password = get_vault_password(&ytx_passwords, MAIN_READWRITE_ROLE)?;
 
     let admin_url = build_url(&postgres_url, &postgres_role, &postgres_password)?;
     let mut admin_client = postgres::Client::connect(&admin_url, postgres::NoTls)
@@ -91,15 +86,8 @@ fn main() -> Result<()> {
         let readwrite_role = format!("ytx_main_{}_readwrite", section);
         let readonly_role = format!("ytx_main_{}_readonly", section);
 
-        let mut readwrite_password =
-            var(&format!("{}_PASSWORD", readwrite_role.to_uppercase())).unwrap_or_default();
-        let mut readonly_password =
-            var(&format!("{}_PASSWORD", readonly_role.to_uppercase())).unwrap_or_default();
-
-        if !ytx_passwords.is_null() {
-            readwrite_password = get_vault_password(&ytx_passwords, &readwrite_role)?;
-            readonly_password = get_vault_password(&ytx_passwords, &readonly_role)?;
-        }
+        let readwrite_password = get_vault_password(&ytx_passwords, &readwrite_role)?;
+        let readonly_password = get_vault_password(&ytx_passwords, &readonly_role)?;
 
         create_role(&mut admin_client, &readwrite_role, &readwrite_password)?;
         create_role(&mut admin_client, &readonly_role, &readonly_password)?;

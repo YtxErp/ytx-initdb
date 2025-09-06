@@ -2,62 +2,70 @@
 # .env - YTX InitDb Environment Configuration
 # =========================================
 # Rename this file to ".env" and place it in your project root.
-# This file is used when initializing databases and creating roles.
-# Role names must be consistent with ytx-server .env to avoid mismatches.
+# This file is used when initializing databases.
 # =========================================
 
 # -----------------------------------------
 # Vault & PostgreSQL Connection
 # -----------------------------------------
-POSTGRES_TOKEN=                        # Vault token for fetching role passwords (optional)
+VAULT_TOKEN=                                # Vault token for fetching passwords
+VAULT_URL=http://127.0.0.1:8200             # Vault server address
 POSTGRES_URL=postgres://postgres@localhost:5432/postgres
-VAULT_ADDR=http://127.0.0.1:8200        # Vault server address
 
 # -----------------------------------------
 # Database Names
 # -----------------------------------------
-AUTH_DB=ytx_auth                        # Authentication database name
-MAIN_DB=ytx_main                        # Main application database name
-MAIN_WORKSPACE=ytx_workspace            # Default workspace identifier for new users
+AUTH_DB=ytx_auth                            # Authentication database
+MAIN_DB=ytx_main                            # Main application database
+MAIN_WORKSPACE=ytx_workspace                # Default workspace identifier for new users
 
 # -----------------------------------------
 # PostgreSQL Superuser
 # -----------------------------------------
-POSTGRES_ROLE=postgres                  # Global PostgreSQL superuser role name
-POSTGRES_PASSWORD=                      # Superuser password (used if Vault token is empty)
+POSTGRES_ROLE=postgres                      # Global PostgreSQL superuser role
 
 # -----------------------------------------
-# AUTH_DB Roles Password
+# Notes
 # -----------------------------------------
-YTX_AUTH_READWRITE_PASSWORD=                 # Password for AUTH_DB read/write role
-
-# -----------------------------------------
-# MAIN_DB Roles Password
-# -----------------------------------------
-YTX_MAIN_READWRITE_PASSWORD=                # Global read/write role for MAIN_DB
-YTX_MAIN_READONLY_PASSWORD=                 # Global read-only role for MAIN_DB
-
-YTX_MAIN_FINANCE_READWRITE_PASSWORD=        # Read/write role for FINANCE section
-YTX_MAIN_FINANCE_READONLY_PASSWORD=         # Read-only role for FINANCE section
-
-YTX_MAIN_STAKEHOLDER_READWRITE_PASSWORD=    # Read/write role for STAKEHOLDER section
-YTX_MAIN_STAKEHOLDER_READONLY_PASSWORD=     # Read-only role for STAKEHOLDER section
-
-YTX_MAIN_ITEM_READWRITE_PASSWORD=           # Read/write role for ITEM section
-YTX_MAIN_ITEM_READONLY_PASSWORD=            # Read-only role for ITEM section
-
-YTX_MAIN_TASK_READWRITE_PASSWORD=           # Read/write role for TASK section
-YTX_MAIN_TASK_READONLY_PASSWORD=            # Read-only role for TASK section
-
-YTX_MAIN_SALE_READWRITE_PASSWORD=           # Read/write role for SALE section
-YTX_MAIN_SALE_READONLY_PASSWORD=            # Read-only role for SALE section
-
-YTX_MAIN_PURCHASE_READWRITE_PASSWORD=       # Read/write role for PURCHASE section
-YTX_MAIN_PURCHASE_READONLY_PASSWORD=        # Read-only role
-
-# -----------------------------------------
-# Notes:
-# - Only *_PASSWORD values can differ between environments
-# - *_ROLE values must match ytx-server .env
-# - Vault takes priority over .env for password values if POSTGRES_TOKEN is set
+# - All role names MUST have their corresponding passwords
+#   pre-created and stored in Vault before InitDb can run.
+#
+# - Vault secret paths:
+#     • PostgreSQL superuser password:
+#         secret/data/postgres/postgres
+#     • YTX roles (auth, main, section-specific):
+#         secret/data/postgres/ytx
+#
+# - Required roles:
+#     • PostgreSQL superuser:
+#         - postgres
+#
+#     • Authentication DB:
+#         - ytx_auth_readwrite
+#
+#     • Main DB global roles:
+#         - ytx_main_readwrite
+#         - ytx_main_readonly
+#
+#     • Section-specific roles (Main DB):
+#         finance:
+#           - ytx_main_finance_readwrite
+#           - ytx_main_finance_readonly
+#         stakeholder:
+#           - ytx_main_stakeholder_readwrite
+#           - ytx_main_stakeholder_readonly
+#         item:
+#           - ytx_main_item_readwrite
+#           - ytx_main_item_readonly
+#         task:
+#           - ytx_main_task_readwrite
+#           - ytx_main_task_readonly
+#         sale:
+#           - ytx_main_sale_readwrite
+#           - ytx_main_sale_readonly
+#         purchase:
+#           - ytx_main_purchase_readwrite
+#           - ytx_main_purchase_readonly
+#
+# - Without these Vault secrets, InitDb will fail.
 # -----------------------------------------

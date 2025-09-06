@@ -162,6 +162,11 @@ pub fn grant_database_readonly_permission(
         &[],
     )?;
 
+    println!(
+        "Granted readonly permission on database '{}' for role '{}'",
+        database, role
+    );
+
     Ok(())
 }
 
@@ -208,6 +213,11 @@ pub fn grant_database_readwrite_permission(
         ),
         &[],
     )?;
+
+    println!(
+        "Granted read/write permissions on database '{}' for role '{}'",
+        database, role
+    );
 
     Ok(())
 }
@@ -261,6 +271,11 @@ pub fn grant_section_readonly_permission(
         ),
         &[],
     )?;
+
+    println!(
+        "Granted readonly permission on section '{}' for role '{}'",
+        section, role
+    );
 
     Ok(())
 }
@@ -319,6 +334,11 @@ pub fn grant_section_readwrite_permission(
         ),
         &[],
     )?;
+
+    println!(
+        "Granted read/write permissions on section '{}' for role '{}'",
+        section, role
+    );
 
     Ok(())
 }
