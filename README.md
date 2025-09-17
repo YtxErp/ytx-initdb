@@ -2,33 +2,38 @@
 
 ## Overview
 
-**YTX InitDB** is a database initialization tool for the YTX ERP system.
+**YTX InitDB** is the database initialization tool for the **YTX ERP system**.
 
-It automates the creation of PostgreSQL databases and all required roles (global and section-specific), configures granular permissions, and initializes schemas.
+It automates:
 
-All passwords are securely fetched from Vault, ensuring no secrets are stored in code or environment files
+- Creation of PostgreSQL databases and roles (both global and section-specific).
+- Setup of granular permissions.
+- Schema initialization.
 
----
+All passwords are securely fetched from **Vault**, ensuring no secrets are stored in code or environment files.
 
 ## Features
 
-- Automated creation of PostgreSQL databases (e.g., `ytx_auth`, `ytx_main`)
-- Automated creation of roles, including:
-  - Global roles:
-    - `ytx_auth_readwrite`
-    - `ytx_main_readwrite`
-    - `ytx_main_readonly`
-  - Section-specific roles (Main DB):
-    - Finance: `ytx_main_finance_readwrite`, `ytx_main_finance_readonly`
-    - Stakeholder: `ytx_main_stakeholder_readwrite`, `ytx_main_stakeholder_readonly`
-    - Item: `ytx_main_item_readwrite`, `ytx_main_item_readonly`
-    - Task: `ytx_main_task_readwrite`, `ytx_main_task_readonly`
-    - Sale: `ytx_main_sale_readwrite`, `ytx_main_sale_readonly`
-    - Purchase: `ytx_main_purchase_readwrite`, `ytx_main_purchase_readonly`
+- **Database creation**: Databases are created based on `.env` configuration.
+  - `AUTH_DB` → Authentication database (default: `ytx_auth`)
+  - `MAIN_DB` → Main application database (default: `ytx_main`)
+  - `MAIN_WORKSPACE` → Default workspace identifier for the main DB (default: `ytx_workspace`)
+
+- **Role management**: All YTX roles are **fixed** and created automatically.
+
+| Section       | Readonly Role                  | ReadWrite Role                 | Description                                      |
+|---------------|--------------------------------|--------------------------------|--------------------------------------------------|
+| Main DB       | ytx_main_readonly              | ytx_main_readwrite             | Role for main database, global                   |
+| Auth DB       | -                              | ytx_auth_readwrite             | Role for authentication database                 |
+| Finance       | ytx_main_finance_readonly      | ytx_main_finance_readwrite     | Finance section in MAIN_DB                       |
+| Stakeholder   | ytx_main_stakeholder_readonly  | ytx_main_stakeholder_readwrite | Stakeholder section in MAIN_DB                   |
+| Item          | ytx_main_item_readonly         | ytx_main_item_readwrite        | Item section in MAIN_DB                          |
+| Task          | ytx_main_task_readonly         | ytx_main_task_readwrite        | Task section in MAIN_DB                          |
+| Sale          | ytx_main_sale_readonly         | ytx_main_sale_readwrite        | Sale section in MAIN_DB                          |
+| Purchase      | ytx_main_purchase_readonly     | ytx_main_purchase_readwrite    | Purchase section in MAIN_DB                      |
+
 - Schema and essential data initialization
 - Granular role permissions for secure data access
-
----
 
 ## Technology Stack
 
@@ -38,34 +43,30 @@ All passwords are securely fetched from Vault, ensuring no secrets are stored in
 - **Config:** `.env` file loaded via `dotenvy`
 - **Vault:** KV v2 secrets engine, JSON-formatted secret data
 
----
+## Environment Variables (`.env`)
 
-## Password Management & Security
+| Variable           | Default           | Description                                                                                  |
+|--------------------|-------------------|----------------------------------------------------------------------------------------------|
+| `POSTGRES_ROLE`    | `postgres`        | Global PostgreSQL superuser role; **can be customized via `.env`**. Used to create all YTX databases and roles. Ensure it has sufficient privileges. |
+| `AUTH_DB`          | `ytx_auth`        | Authentication database. Can be customized.                                                  |
+| `MAIN_DB`          | `ytx_main`        | Main application database. Can be customized.                                                |
+| `MAIN_WORKSPACE`   | `ytx_workspace`   | Default workspace identifier for the main DB. **⚠️ Must be unique**: each workspace should correspond to exactly one MAIN_DB.  |
+| `VAULT_TOKEN`      | *(none)*                                      | Vault token used to fetch passwords. Must be provided in `.env`.                                   |
+| `VAULT_URL`        | `http://127.0.0.1:8200`                       | Vault server address. Can be customized.                                                           |
+| `POSTGRES_URL`     | `postgres://postgres@localhost:5432/postgres` | Connection URL for PostgreSQL superuser. Can be customized.                                        |
+
+## Security & Password Management
 
 - Vault token (`VAULT_TOKEN`) is required to fetch passwords.
-- All roles MUST have their corresponding passwords pre-created and stored in Vault before InitDb can run.
+- **No passwords** are hardcoded or stored in .env.
+- Required Vault secrets must exist **before** running InitDB:
 
-- Vault secret paths:
-  - PostgreSQL superuser password
-    - `secret/data/postgres/postgres`
-  - YTX roles (auth, main, section-specific):
-    - `secret/data/postgres/ytx`
+| Secret Path                | Keys                                                                                                                                                         |
+|----------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `secret/postgres/postgres` | `postgres` (PostgreSQL superuser password)                                                                                                                   |
+| `secret/postgres/ytx`      | `ytx_auth_readwrite`, `ytx_main_readwrite`, `ytx_main_readonly`, `ytx_main_finance_readwrite`, `ytx_main_finance_readonly`, `ytx_main_stakeholder_readwrite`, `ytx_main_stakeholder_readonly`, `ytx_main_item_readwrite`, `ytx_main_item_readonly`, `ytx_main_task_readwrite`, `ytx_main_task_readonly`, `ytx_main_sale_readwrite`, `ytx_main_sale_readonly`, `ytx_main_purchase_readwrite`, `ytx_main_purchase_readonly` |
 
-- Required roles:
-  - PostgreSQL superuser: `postgres`
-  - Auth DB: `ytx_auth_readwrite`
-  - Main DB: `ytx_main_readwrite`, `ytx_main_readonly`
-  - Section-specific roles (Main DB):
-    - finance: `ytx_main_finance_readwrite`, `ytx_main_finance_readonly`
-    - stakeholder: `ytx_main_stakeholder_readwrite`, `ytx_main_stakeholder_readonly`
-    - item: `ytx_main_item_readwrite`, `ytx_main_item_readonly`
-    - task: `ytx_main_task_readwrite`, `ytx_main_task_readonly`
-    - sale: `ytx_main_sale_readwrite`, `ytx_main_sale_readonly`
-    - purchase: `ytx_main_purchase_readwrite`, `ytx_main_purchase_readonly`
-
-- Without these Vault secrets, InitDb will fail.
-
----
+- If any secret is missing, InitDB will fail.
 
 ## Quick Start
 
@@ -78,8 +79,8 @@ A preconfigured `docker-compose.yml` is provided for local development/testing.
 - **Important**: Always wrap `POSTGRES_PASSWORD` in double quotes (`""`) in Docker Compose.
 - **Volumes** are used to persist database and Vault data outside the container. Customize these paths on your host machine as needed.
 
-| Container          | Volume Path (Host)                | Container Path                | Purpose |
-|:------------------:|-----------------------------------|-------------------------------|---------|
+| Container          | Volume Path (Host)                | Container Path                | Purpose                                                                                              |
+|:------------------:|-----------------------------------|-------------------------------|------------------------------------------------------------------------------------------------------|
 | PostgreSQL         | `/path/to/your/local/postgres`    | `/var/lib/postgresql/data`    | Stores all database files; ensures DB data persists across container restarts. |
 | Vault file         | `/path/to/your/local/vault/file`  | `/vault/file`                 | Stores Vault's persistent secrets and configuration; ensures Vault data survives container restarts. |
 | Vault logs         | `/path/to/your/local/vault/logs`  | `/vault/logs`                 | Stores Vault log files; useful for debugging and auditing. |

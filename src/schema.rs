@@ -38,6 +38,7 @@ pub fn ytx_workspace_database() -> String {
         database         TEXT NOT NULL,
         created_time     TIMESTAMPTZ(0),
         updated_time     TIMESTAMPTZ(0),
+        expire_time      TIMESTAMPTZ(0),
         updated_by       UUID,
         is_valid         BOOLEAN DEFAULT TRUE
     );

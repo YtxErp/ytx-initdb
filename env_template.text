@@ -17,7 +17,7 @@ POSTGRES_URL=postgres://postgres@localhost:5432/postgres
 # -----------------------------------------
 AUTH_DB=ytx_auth                            # Authentication database
 MAIN_DB=ytx_main                            # Main application database
-MAIN_WORKSPACE=ytx_workspace                # Default workspace identifier for new users
+MAIN_WORKSPACE=ytx_workspace                # Default workspace identifier for new MAIN_DB
 
 # -----------------------------------------
 # PostgreSQL Superuser
